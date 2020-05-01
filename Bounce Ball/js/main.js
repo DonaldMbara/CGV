@@ -1,0 +1,1 @@
+var canvas, renderer, scene, camera; // Standard three.js requirements.
