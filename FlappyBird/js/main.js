@@ -2,8 +2,6 @@
  * Group : Boolean Autocrats
  */
 window.addEventListener('load', init, false); //load our init() function
-
-
 // Standard three.js requirements.
 var renderer;
 var camera;
@@ -20,6 +18,7 @@ var loader;
 var plane;
 
 
+
 //camera variables and parameters variables
 var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
     renderer, container;
@@ -33,11 +32,14 @@ var sea;
 var sky;
 var cloud
 
+var spear;
 
 
 
-//----------------------------Main function for initialising----------------------------
 
+/**
+ *  This init() function is called when by the onload event when the document has loaded.
+ */
 
 function init() {
 
@@ -46,7 +48,7 @@ function init() {
 
     // add the lights
     createLights();
-
+    Spear();
     // add the objects
     createBird();
     createSea();
@@ -54,7 +56,7 @@ function init() {
 
 
     //add the listener
-    //document.addEventListener('mousemove', handleMouseMove, false);
+    document.addEventListener('keydown', doKey, false);
 
     //render the scene on each frame
     renderer.setAnimationLoop(() => {
@@ -103,7 +105,7 @@ createScene = function() {
     container = document.getElementById('world');
     container.appendChild(renderer.domElement);
 
-    //for handling sccreen resizing
+    //for handling screen resizing
     window.addEventListener('resize', windowResize, false);
 
 
@@ -209,9 +211,9 @@ Cloud = function() {
     // empty container that will hold the different parts of the cloud
     this.mesh = new THREE.Object3D();
 
-    // create a cube geometry;
+    // creating a cube geometry;
     // this shape will be duplicated to create the cloud
-    var clouadGeometry = new THREE.BoxGeometry(20, 20, 20);
+    var cloudGeometry = new THREE.BoxGeometry(20, 20, 20);
 
 
     var cloudMaterial = new THREE.MeshPhongMaterial({
@@ -222,7 +224,7 @@ Cloud = function() {
     var nBlocks = 3 + Math.floor(Math.random() * 3);
     for (var i = 0; i < nBlocks; i++) {
 
-        cloud = new THREE.Mesh(clouadGeometry, cloudMaterial);
+        cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
         // set the position and the rotation of each cube randomly
         cloud.position.x = i * 15;
@@ -264,7 +266,7 @@ Sky = function() {
 
         // set the rotation and the position of each cloud;
         var a = stepAngle * i; // this is the final angle of the cloud
-        var h = 750 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+        var h = 750 + +150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
@@ -292,7 +294,7 @@ Sky = function() {
 
 function createSky() {
     sky = new Sky();
-    sky.mesh.position.y = -600;
+    sky.mesh.position.y = -750;
     scene.add(sky.mesh);
 }
 
@@ -301,7 +303,7 @@ function createSky() {
 
 function Sea() {
 
-    // create the geometry (shape) of the cylinder;
+    // creating the geometry (shape) of the cylinder;
     // the parameters are: 
     // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
     var geometry = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
@@ -331,8 +333,6 @@ function createSea() {
 
     // bottom of the scene
     sea.mesh.position.y = -600;
-
-    // add to the scene
     scene.add(sea.mesh);
 }
 
@@ -350,7 +350,7 @@ Sea = function() {
     // get the vertices
     var l = geom.vertices.length;
 
-    // create an array to store new data associated to each vertex
+    //  an array to store new data associated to each vertex
     this.waves = [];
 
     for (var i = 0; i < l; i++) {
@@ -439,6 +439,89 @@ function update() {
 }
 
 
+//----------------------------- keyboard support ----------------------------------
+
+/*  Responds to user's key press.  Here, it is used to rotate the model.
+ */
+function doKey(event) {
+    var code = event.keyCode;
+    var rotated = true;
+
+    //fix later
+    // if (code === 37) {
+    //     //left arrow
+
+
+
+    // } else if (code === 39) {
+    //     //right arrow
+
+
+    // } else if (code === 38) {
+    //     //up arrow
+
+    // } else if (code === 40) {
+    //     //down arrow
+
+    // }
+
+
+    switch (code) {
+        case 37:
+            birdModel.position.z -= 1;
+            //birdModel.rotation.x -= 0.03
+            break; // left arrow
+        case 39:
+            birdModel.position.z += 1;
+            //birdModel.rotation.x += 0.03
+
+            break; // right arrow
+        case 38:
+            birdModel.position.y += 1;;
+            break; // up arrow
+        case 40:
+            birdModel.position.y -= 1;
+            break; // down arrow
+    }
+
+}
+
+
+//-----------------------------Enemy-------------------------------
+
+
+function Spear() {
+    this.mesh = new THREE.Object3D();
+    var geom = new THREE.CylinderGeometry(3, 0.05, 20, 5);
+    var mat = new THREE.MeshPhongMaterial({
+        color: "blue",
+        shininess: 0,
+        specular: 0xffffff,
+        shading: THREE.FlatShading
+    });
+
+
+    var nBlocks = 10;
+    for (var i = 0; i < nBlocks; i++) {
+        spear = new THREE.Mesh(geom.clone(), mat);
+        // set the position of each spear randomly
+        spear.position.x = i * 15;
+        spear.position.y = 100 + Math.random() * 110
+
+
+        this.mesh.add(spear);
+
+        // allow each cube to cast and to receive shadows
+        spear.castShadow = true;
+        spear.receiveShadow = true;
+    }
+    spear.rotation.z = -1.5;
+    scene.add(spear);
+
+}
+
+
+
 
 
 
@@ -465,10 +548,9 @@ function render() {
     // Rotate the sea and the sky
     sea.mesh.rotation.z += .0015;
     sky.mesh.rotation.z += .01;
+
     sea.moveWaves(); //wave 
     renderer.render(scene, camera);
     // call the loop function again
     requestAnimationFrame(render);
 }
-
-//window.onload = init;
