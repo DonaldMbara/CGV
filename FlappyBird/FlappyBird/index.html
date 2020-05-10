@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flappy Bird Game3D</title>
+
+    <!--
+
+      Include the main three.js script.
+
+      The global variable THREE will be
+      available for use in any scripts
+      loaded after this one.
+
+    -->
+
+    <script src="js/three/three.js"></script>
+
+    <!--
+
+      Include the OrbitControls script.
+
+      This must be included AFTER the three.js script as it
+      needs to use the global THREE variable
+
+    -->
+
+    <script src="js/three/OrbitControls.js"></script>
+
+    <!--
+
+			Include the GLTFLoader script. This also needs to be loaded after the three.js script
+
+		-->
+
+    <script src="js/three/GLTFLoader.js"></script>
+
+    <style>
+        #world {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( #408be0, #67b1e2);
+        }
+        
+        html,
+        body,
+        #world {
+            margin: 0;
+            height: 100%;
+            overflow: hidden
+        }
+    </style>
+
+    <script type="text/javascript" src="js/main.js">
+        "use strict";
+    </script>
+</head>
+
+<body>
+
+    <div id="world"></div>
+    <noscript>
+   <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+</noscript>
+
+
+</body>
+
+</html>
