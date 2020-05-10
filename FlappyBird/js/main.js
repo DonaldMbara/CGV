@@ -14,8 +14,9 @@ const clock = new THREE.Clock();
 const birdModel_PATH = 'model/Stork.glb';
 var birdModel;
 var loader;
-
+var spearFreq; //number of spears that passed a point
 var plane;
+
 
 
 
@@ -31,9 +32,8 @@ var hemisphereLight, shadowLight;
 var sea;
 var sky;
 var cloud
-
 var spear;
-
+var rotateSpears;
 
 
 
@@ -48,7 +48,7 @@ function init() {
 
     // add the lights
     createLights();
-    Spear();
+    createSpears();
     // add the objects
     createBird();
     createSea();
@@ -211,13 +211,13 @@ Cloud = function() {
     // empty container that will hold the different parts of the cloud
     this.mesh = new THREE.Object3D();
 
-    // creating a cube geometry;
+    // creating a torus geometry;
     // this shape will be duplicated to create the cloud
-    var cloudGeometry = new THREE.BoxGeometry(20, 20, 20);
+    var cloudGeometry = new THREE.TorusGeometry(10, 20, 5, 10);
 
 
     var cloudMaterial = new THREE.MeshPhongMaterial({
-        color: "white",
+        color: "white"
     });
 
     // duplicate the geometry a random number of times
@@ -226,7 +226,7 @@ Cloud = function() {
 
         cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
-        // set the position and the rotation of each cube randomly
+        // set the position and the rotation of each torus randomly
         cloud.position.x = i * 15;
         cloud.position.y = Math.random() * 10;
         cloud.position.z = Math.random() * 10;
@@ -234,14 +234,14 @@ Cloud = function() {
         cloud.rotation.y = Math.random() * Math.PI * 2;
 
         // set the size of the cube randomly
-        var s = .1 + Math.random() * .9;
-        cloud.scale.set(s, s, s);
+        var size = .1 + Math.random() * .9;
+        cloud.scale.set(size, size, size);
 
         // allow each cube to cast and to receive shadows
         cloud.castShadow = true;
         cloud.receiveShadow = true;
 
-        // add the cube to the container we first created
+        // add the torus to the container we first created
         this.mesh.add(cloud);
     }
 }
@@ -280,9 +280,9 @@ Sky = function() {
         // at random depths inside of the scene
         cloud.mesh.position.z = -400 - Math.random() * 400;
 
-        // we also set a random scale for each cloud
-        var s = 1 + Math.random() * 2;
-        cloud.mesh.scale.set(s, s, s);
+        // set a random scale for each cloud
+        var size = 1 + Math.random() * 2;
+        cloud.mesh.scale.set(size, size, size);
 
         this.mesh.add(cloud.mesh);
     }
@@ -501,25 +501,80 @@ function Spear() {
     });
 
 
-    var nBlocks = 10;
-    for (var i = 0; i < nBlocks; i++) {
-        spear = new THREE.Mesh(geom.clone(), mat);
-        // set the position of each spear randomly
-        spear.position.x = i * 15;
-        spear.position.y = 100 + Math.random() * 110
 
-
-        this.mesh.add(spear);
+    // duplicate the geometry a random number of times
+    spearFreq = 3 + Math.floor(Math.random() * 3);
+    for (var i = 0; i < spearFreq; i++) {
+        spear = new THREE.Mesh(geom, mat);
 
         // allow each cube to cast and to receive shadows
         spear.castShadow = true;
         spear.receiveShadow = true;
+        spear.rotation.z = 1.5;
+
+        //random position of the spear
+        spear.position.x = 150;
+        spear.position.y = 100 + Math.random() * 110;
+        spear.position.z = -50 + Math.random() * 150;
+
+
+
+        // add the spears to the container we first created
+        this.mesh.add(spear);
+
     }
-    spear.rotation.z = -1.5;
-    scene.add(spear);
+
 
 }
 
+
+RotateSpears = function() {
+
+    // Create an empty container
+    this.mesh = new THREE.Object3D();
+
+    // number of spears to be scattered in the sky
+    this.nSpears = 20;
+
+    // To distribute the spears consistently,
+    // we need to place them according to a uniform angle
+    var stepAngle = Math.PI * 2 / this.nSpears;
+
+    // create the spears
+    for (var i = 0; i < this.nSpears; i++) {
+        var spear = new Spear();
+
+        // set the rotation and the position of each spears;
+        var a = stepAngle * i; // this is the final angle of the spears
+        var h = 750 + +150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+
+
+        //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
+        spear.mesh.position.y = Math.sin(a) * h;
+        spear.mesh.position.x = Math.cos(a) * h;
+
+        // rotating the spears according to its position
+        spear.mesh.rotation.z = a + Math.PI / 1.8;
+
+        // for a better result, we position the spears 
+        // at random depths inside of the scene
+        spear.mesh.position.z = -100 - Math.random() * 50;
+
+        // set a random scale for each spears
+
+        this.mesh.add(spear.mesh);
+    }
+}
+
+
+
+
+
+function createSpears() {
+    rotateSpears = new RotateSpears();
+    rotateSpears.mesh.position.y = -700;
+    scene.add(rotateSpears.mesh);
+}
 
 
 
@@ -545,9 +600,11 @@ function Spear() {
 
 function render() {
 
-    // Rotate the sea and the sky
+    // Rotate the sea,spears and the sky
     sea.mesh.rotation.z += .0015;
     sky.mesh.rotation.z += .01;
+    rotateSpears.mesh.rotation.z += 0.001;
+
 
     sea.moveWaves(); //wave 
     renderer.render(scene, camera);
