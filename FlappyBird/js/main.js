@@ -5,6 +5,7 @@ window.addEventListener('load', init, false); //load our init() function
 // Standard three.js requirements.
 var renderer;
 var camera;
+var control;
 var scene = new THREE.Scene();
 
 
@@ -16,6 +17,9 @@ var birdModel;
 var loader;
 var spearFreq; //number of spears that passed a point
 var plane;
+
+//arrays to store spears
+
 
 
 
@@ -34,6 +38,8 @@ var sky;
 var cloud
 var spear;
 var rotateSpears;
+var coin;
+var rotateCoins;
 
 
 
@@ -49,10 +55,13 @@ function init() {
     // add the lights
     createLights();
     createSpears();
+
+    createCoins();
     // add the objects
     createBird();
     createSea();
     createSky();
+
 
 
     //add the listener
@@ -169,8 +178,10 @@ createBird = function() {
         mixers.push(mixer);
         birdModel.scale.set(7, 7, 7); //increase size of the bird by a factor of 7
 
-        birdModel.rotation.z = -1.5; //rotating the bird
-        birdModel.position.set(-50, 130, -20); // position the bird
+        birdModel.rotation.z = -1.4; //rotating the bird
+        birdModel.position.set(-50, 100, 0); // position the bird
+
+
 
 
 
@@ -211,20 +222,34 @@ Cloud = function() {
     // empty container that will hold the different parts of the cloud
     this.mesh = new THREE.Object3D();
 
+    const geo = new THREE.Geometry()
+
+
     // creating a torus geometry;
     // this shape will be duplicated to create the cloud
-    var cloudGeometry = new THREE.TorusGeometry(10, 20, 5, 10);
+    const tuft1 = new THREE.SphereGeometry(15, 10, 8)
+    tuft1.translate(-2, 0, 0)
+    geo.merge(tuft1)
+
+    const tuft2 = new THREE.SphereGeometry(15, 10, 8)
+    tuft2.translate(2, 0, 0)
+    geo.merge(tuft2)
+
+    const tuft3 = new THREE.SphereGeometry(20, 10, 8)
+    tuft3.translate(0, 0, 0)
+    geo.merge(tuft3)
 
 
-    var cloudMaterial = new THREE.MeshPhongMaterial({
-        color: "white"
+    var cloudMaterial = new THREE.MeshLambertMaterial({
+        color: 'white',
+        flatShading: true
     });
 
     // duplicate the geometry a random number of times
-    var nBlocks = 3 + Math.floor(Math.random() * 3);
+    var nBlocks = 4 + Math.floor(Math.random() * 4);
     for (var i = 0; i < nBlocks; i++) {
 
-        cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        cloud = new THREE.Mesh(geo, cloudMaterial);
 
         // set the position and the rotation of each torus randomly
         cloud.position.x = i * 15;
@@ -234,7 +259,7 @@ Cloud = function() {
         cloud.rotation.y = Math.random() * Math.PI * 2;
 
         // set the size of the cube randomly
-        var size = .1 + Math.random() * .9;
+        var size = .5 + Math.random() * .6;
         cloud.scale.set(size, size, size);
 
         // allow each cube to cast and to receive shadows
@@ -439,52 +464,6 @@ function update() {
 }
 
 
-//----------------------------- keyboard support ----------------------------------
-
-/*  Responds to user's key press.  Here, it is used to rotate the model.
- */
-function doKey(event) {
-    var code = event.keyCode;
-    var rotated = true;
-
-    //fix later
-    // if (code === 37) {
-    //     //left arrow
-
-
-
-    // } else if (code === 39) {
-    //     //right arrow
-
-
-    // } else if (code === 38) {
-    //     //up arrow
-
-    // } else if (code === 40) {
-    //     //down arrow
-
-    // }
-
-
-    switch (code) {
-        case 37:
-            birdModel.position.z -= 1;
-            //birdModel.rotation.x -= 0.03
-            break; // left arrow
-        case 39:
-            birdModel.position.z += 1;
-            //birdModel.rotation.x += 0.03
-
-            break; // right arrow
-        case 38:
-            birdModel.position.y += 1;;
-            break; // up arrow
-        case 40:
-            birdModel.position.y -= 1;
-            break; // down arrow
-    }
-
-}
 
 
 //-----------------------------Enemy-------------------------------
@@ -507,15 +486,16 @@ function Spear() {
     for (var i = 0; i < spearFreq; i++) {
         spear = new THREE.Mesh(geom, mat);
 
+
         // allow each cube to cast and to receive shadows
         spear.castShadow = true;
         spear.receiveShadow = true;
         spear.rotation.z = 1.5;
 
         //random position of the spear
-        spear.position.x = 150;
-        spear.position.y = 100 + Math.random() * 110;
-        spear.position.z = -50 + Math.random() * 150;
+        spear.position.x = 100;
+        spear.position.y = 10 + Math.random() * (140);
+        spear.position.z = 100 + Math.random() * 40;
 
 
 
@@ -546,7 +526,7 @@ RotateSpears = function() {
 
         // set the rotation and the position of each spears;
         var a = stepAngle * i; // this is the final angle of the spears
-        var h = 750 + +150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+        var h = 600 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
@@ -577,6 +557,96 @@ function createSpears() {
 }
 
 
+//-----------------------------------------coins---------------------------
+
+
+function Coin() {
+    this.mesh = new THREE.Object3D();
+    var geom = new THREE.TorusBufferGeometry(3, .8, 6, 68);
+    var mat = new THREE.MeshPhongMaterial({
+        color: "yellow",
+        shininess: 0,
+        specular: 0xffffff,
+        shading: THREE.FlatShading
+    });
+
+
+    coin = new THREE.Mesh(geom, mat);
+
+    // duplicate the geometry a random number of times
+    var coinFreq = 3 + Math.floor(Math.random() * 5);
+    for (var i = 0; i < coinFreq; i++) {
+
+
+
+        // allow each coin to cast and to receive shadows
+        coin.castShadow = true;
+        coin.receiveShadow = true;
+
+        //random position of the coin
+        coin.position.x = 100;
+        coin.position.y = 10 + Math.random() * (150);
+        coin.position.x = 100 + Math.random() * 40;
+
+
+
+        // add the coins to the container we first created
+        this.mesh.add(coin);
+
+    }
+
+
+}
+
+
+RotateCoins = function() {
+
+    // Create an empty container
+    this.mesh = new THREE.Object3D();
+
+    // number of coin to be scattered in the sky
+    this.nCoins = 100;
+
+    // To distribute the coin consistently,
+    // we need to place them according to a uniform angle
+    var stepAngle = Math.PI * 4 / this.nCoins;
+
+    // create the coin
+    for (var i = 0; i < this.nCoins; i++) {
+        var coin = new Coin();
+
+        // set the rotation and the position of each coin;
+        var a = stepAngle * i; // this is the final angle of the coin
+        var h = 600 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the coin itself
+
+
+        //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
+        coin.mesh.position.y = Math.sin(a) * h;
+        coin.mesh.position.x = Math.cos(a) * h;
+
+        // rotating the coin according to its position
+        coin.mesh.rotation.z = a + Math.PI / 1.8;
+
+        // for a better result, we position the coin 
+        // at random depths inside of the scene
+        coin.mesh.position.z = -100 - Math.random() * 50;
+
+        // set a random scale for each coin
+
+        this.mesh.add(coin.mesh);
+    }
+}
+
+
+
+
+
+function createCoins() {
+    rotateCoins = new RotateCoins();
+    rotateCoins.mesh.position.y = -700;
+    scene.add(rotateCoins.mesh);
+}
+
 
 
 
@@ -595,6 +665,65 @@ function createSpears() {
 //     });
 // }
 
+//----------------------------- keyboard support ----------------------------------
+
+/*  Responds to user's key press.  Here, it is used to rotate the model.
+ */
+function doKey(event) {
+    var code = event.keyCode;
+
+
+
+
+    if (code === 37 && birdModel.position.z > -40) { //put some boundaries for the bird
+        //does not have to exceed -40 units z-diration
+        //left arrow
+        birdModel.position.z -= 1;
+    } else if (code === 39 && birdModel.position.z < 40) { //put some boundaries for the bird
+        //does not have to exceed 40 units z-diration
+        //right arrow
+
+        birdModel.position.z += 1;
+
+
+    } else if (code === 38 && birdModel.position.y < 140) { //put some boundaries for the bird
+        //does not have to exceed 140 units above y-diration
+
+        //up arrow
+        birdModel.position.y += 1;;
+
+
+    } else if (code === 40 && birdModel.position.y > 10) { //put some boundaries for the bird
+        //does not have to exceed 10 units below y-diration
+        //down arrow
+        birdModel.position.y -= 1;
+
+
+    }
+
+
+
+    // switch (code) {
+    //     case 37:
+    //         //birdModel.rotation.x -= 0.03
+    //         break; // left arrow
+    //     case 39:
+    //         //birdModel.rotation.x += 0.03
+
+    //         break; // right arrow
+    //     case 38:
+    //         break; // up arrow
+    //     case 40:
+    //         break; // down arrow
+    // }
+
+}
+
+//------------------------------collison-----------------------------------------
+
+
+console.log(1);
+
 //----------------------Rendering-----------------------------------------------
 
 
@@ -603,7 +732,9 @@ function render() {
     // Rotate the sea,spears and the sky
     sea.mesh.rotation.z += .0015;
     sky.mesh.rotation.z += .01;
-    rotateSpears.mesh.rotation.z += 0.001;
+    rotateSpears.mesh.rotation.z += .001;
+    rotateCoins.mesh.rotation.z += .001;
+
 
 
     sea.moveWaves(); //wave 
