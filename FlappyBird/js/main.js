@@ -11,15 +11,30 @@ var scene = new THREE.Scene();
 
 //Model  variables
 var mixers = [];
-const clock = new THREE.Clock();
+var clock = new THREE.Clock();
 const birdModel_PATH = 'model/Stork.glb';
 var birdModel;
 var loader;
 var spearFreq; //number of spears that passed a point
-var plane;
 
-//arrays to store spears
+// we use this one to reduce the health if the bird is not taking coins
+// it increases with level, and gets updated with distance
+var tracking = 0;
 
+
+
+
+//collision
+
+//stores all mesh which collide with the bird, e.i spear & coin
+var collidableSpears = [],
+    collidableCoins = [];
+
+
+//bird position
+var bird; //bird vector3 position
+var birdPositionY, birdPositionX, birdPositionZ;
+var birdRotationY, birdRotationX, birdRotationZ;
 
 
 
@@ -40,7 +55,13 @@ var spear;
 var rotateSpears;
 var coin;
 var rotateCoins;
-
+var score = 0;
+var distance = 0;
+var initHealth = 100;
+var gameSpead = .001;
+var coinsCollided = 0; //helps with score, should be incremented when our hero collides with a coin
+var gameStatus = "play";
+var scoreBoard;
 
 
 /**
@@ -61,6 +82,13 @@ function init() {
     createBird();
     createSea();
     createSky();
+
+    resetGame();
+
+
+
+    fieldDistance = document.getElementById("distValue");
+    fieldGameOver = document.getElementById("gameoverInstructions");
 
 
 
@@ -117,7 +145,7 @@ createScene = function() {
     //for handling screen resizing
     window.addEventListener('resize', windowResize, false);
 
-
+    clock = new THREE.Clock();
 }
 
 
@@ -179,7 +207,12 @@ createBird = function() {
         birdModel.scale.set(7, 7, 7); //increase size of the bird by a factor of 7
 
         birdModel.rotation.z = -1.4; //rotating the bird
-        birdModel.position.set(-50, 100, 0); // position the bird
+
+        birdPosition = birdModel.position.copy(position);
+        birdPositionY = birdModel.position.y;
+        birdPositionX = birdModel.position.x;
+        birdPositionZ = birdModel.position.z;
+
 
 
 
@@ -193,9 +226,31 @@ createBird = function() {
             if (o.isMesh) {
                 o.castShadow = true;
                 o.receiveShadow = true;
+
+
+
+
+                //     for (var vertexIndex = 0; vertexIndex < o.geometry.vertices.length; vertexIndex++) {
+                //         var localVertex = o.geometry.vertices[vertexIndex].clone();
+                //         var globalVertex = localVertex.applyMatrix4(birdModel.matrix);
+                //         var directionVector = globalVertex.sub(birdModel.position);
+                //         var ray = new THREE.Raycaster(
+                //             originPoint, directionVector.clone().normalize());
+                //         var collisionResults =
+                //             ray.intersectObjects(collidableList);
+
+                //         if (collisionResults.length > 0 &&
+                //             collisionResults[0].distance < directionVector.length()) {
+                //             console.log("hit");
+                //         }
+                //     }
+
             }
+
+
         });
 
+        birdModel.name = "bird";
         scene.add(birdModel);
 
     };
@@ -208,13 +263,18 @@ createBird = function() {
     const onError = (errorMessage) => { console.log(errorMessage); };
 
     // load the model. The model is loaded asynchronously
-    const bird = new THREE.Vector3(0, 0, 0);
+    bird = new THREE.Vector3(-50, 100, 0);
     loader.load(birdModel_PATH, gltf => onLoad(gltf, bird), onProgress, onError);
 
+    var originPoint = bird; //current posotion of the bird
 
+    //sending rays from center of the bird
 
 
 }
+
+
+
 
 //-----------------------Clouds-------------------------------------------------
 
@@ -451,6 +511,8 @@ function windowResize() {
 
 //---------------bird animation update -------------------------------
 
+
+
 function update() {
 
     const delta = clock.getDelta();
@@ -463,7 +525,68 @@ function update() {
 
 }
 
+//------------------updating score and distance-----------------------
 
+
+function updateDistance() {
+    distance += gameSpead * 100;
+    var d = distance / 2;
+    fieldDistance.innerHTML = Math.floor(d);
+    tracking += .03;
+}
+
+function updateScore() {
+
+    score += coinsCollided;
+    var s = distance / 2;
+    fieldDistance.innerHTML = Math.floor(s);
+
+}
+
+function updateHealth(h) {
+
+    let health = document.getElementById("health");
+    h = initHealth - tracking;
+    // console.log(h);
+
+    // if (health == "50%") {
+    //     document.getElementById("health").style. = "red";
+
+    // }
+
+
+
+    if (Math.ceil(h) == 0) {
+        gameOver();
+        console.log(h);
+    }
+
+    return health.style.width = h + "%"; //we updating the healthbar
+
+}
+
+
+//----------------------------------gameOver------------------
+
+function gameOver() {
+    fieldGameOver.className = "show";
+    gameStatus = "gameOver";
+    spear.mesh.visible = false;
+    coin.mesh.visible = false;
+}
+
+//---------------------reset game for restarting---------------------
+
+
+function resetGame() {
+
+    bird = new THREE.Vector3(-50, 100, 0);
+
+    gameSpead = .001;
+    level = 0;
+    distance = 0;
+    gameStatus = "play";
+}
 
 
 //-----------------------------Enemy-------------------------------
@@ -485,6 +608,7 @@ function Spear() {
     spearFreq = 3 + Math.floor(Math.random() * 3);
     for (var i = 0; i < spearFreq; i++) {
         spear = new THREE.Mesh(geom, mat);
+
 
 
         // allow each cube to cast and to receive shadows
@@ -521,8 +645,9 @@ RotateSpears = function() {
     var stepAngle = Math.PI * 2 / this.nSpears;
 
     // create the spears
+    var _spear;
     for (var i = 0; i < this.nSpears; i++) {
-        var spear = new Spear();
+        _spear = new Spear();
 
         // set the rotation and the position of each spears;
         var a = stepAngle * i; // this is the final angle of the spears
@@ -530,20 +655,24 @@ RotateSpears = function() {
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
-        spear.mesh.position.y = Math.sin(a) * h;
-        spear.mesh.position.x = Math.cos(a) * h;
+        _spear.mesh.position.y = Math.sin(a) * h;
+        _spear.mesh.position.x = Math.cos(a) * h;
 
         // rotating the spears according to its position
-        spear.mesh.rotation.z = a + Math.PI / 1.8;
+        _spear.mesh.rotation.z = a + Math.PI / 1.8;
 
         // for a better result, we position the spears 
         // at random depths inside of the scene
-        spear.mesh.position.z = -100 - Math.random() * 50;
+        _spear.mesh.position.z = -100 - Math.random() * 50;
 
         // set a random scale for each spears
 
-        this.mesh.add(spear.mesh);
+        this.mesh.add(_spear.mesh);
+        collidableSpears.push(_spear.mesh)
+
     }
+
+    // console.log(collidableSpears);
 }
 
 
@@ -554,6 +683,8 @@ function createSpears() {
     rotateSpears = new RotateSpears();
     rotateSpears.mesh.position.y = -700;
     scene.add(rotateSpears.mesh);
+
+
 }
 
 
@@ -612,8 +743,9 @@ RotateCoins = function() {
     var stepAngle = Math.PI * 4 / this.nCoins;
 
     // create the coin
+    var _coin;
     for (var i = 0; i < this.nCoins; i++) {
-        var coin = new Coin();
+        _coin = new Coin();
 
         // set the rotation and the position of each coin;
         var a = stepAngle * i; // this is the final angle of the coin
@@ -621,20 +753,23 @@ RotateCoins = function() {
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
-        coin.mesh.position.y = Math.sin(a) * h;
-        coin.mesh.position.x = Math.cos(a) * h;
+        _coin.mesh.position.y = Math.sin(a) * h;
+        _coin.mesh.position.x = Math.cos(a) * h;
 
         // rotating the coin according to its position
-        coin.mesh.rotation.z = a + Math.PI / 1.8;
+        _coin.mesh.rotation.z = a + Math.PI / 1.8;
 
         // for a better result, we position the coin 
         // at random depths inside of the scene
-        coin.mesh.position.z = -100 - Math.random() * 50;
+        _coin.mesh.position.z = -100 - Math.random() * 50;
 
         // set a random scale for each coin
 
-        this.mesh.add(coin.mesh);
+        this.mesh.add(_coin.mesh);
+        collidableCoins.push(_coin.mesh);
     }
+
+    // console.log(collidableCoins)
 }
 
 
@@ -667,7 +802,7 @@ function createCoins() {
 
 //----------------------------- keyboard support ----------------------------------
 
-/*  Responds to user's key press.  Here, it is used to rotate the model.
+/*  Responds to user's key press.  Here, it is used to move the model.
  */
 function doKey(event) {
     var code = event.keyCode;
@@ -722,7 +857,9 @@ function doKey(event) {
 //------------------------------collison-----------------------------------------
 
 
-console.log(1);
+
+
+
 
 //----------------------Rendering-----------------------------------------------
 
@@ -732,13 +869,17 @@ function render() {
     // Rotate the sea,spears and the sky
     sea.mesh.rotation.z += .0015;
     sky.mesh.rotation.z += .01;
-    rotateSpears.mesh.rotation.z += .001;
-    rotateCoins.mesh.rotation.z += .001;
+    rotateSpears.mesh.rotation.z += gameSpead;
+    rotateCoins.mesh.rotation.z += gameSpead;
 
 
 
     sea.moveWaves(); //wave 
+    updateDistance();
+    updateHealth();
     renderer.render(scene, camera);
+
+
     // call the loop function again
     requestAnimationFrame(render);
 }
