@@ -986,19 +986,17 @@ function render() {
         rotateCoins.mesh.rotation.z += gameSpead + levelSpeed;
         levelSpeed += .000005; // update levelSpeed
 
-        //updating
-        sea.moveWaves(); //wave 
-        updateDistance();
-        updateHealth();
-        collisionCoin();
-        collisionSpear();
-
     }
     //console.log(levelSpeed);
 
 
 
-
+    //updating
+    sea.moveWaves(); //wave 
+    updateDistance();
+    updateHealth();
+    collisionCoin();
+    collisionSpear();
 
 
     renderer.render(scene, camera);
