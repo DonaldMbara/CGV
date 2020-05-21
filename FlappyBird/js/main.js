@@ -14,6 +14,7 @@ var mixers = [];
 var clock = new THREE.Clock();
 const birdModel_PATH = 'model/Stork.glb';
 var birdModel;
+var cube; //covers the bird
 var loader;
 var spearFreq; //number of spears that passed a point
 
@@ -27,8 +28,7 @@ var tracking = 0;
 //collision
 
 //stores all mesh which collide with the bird, e.i spear & coin
-var collidableSpears = [],
-    collidableCoins = [];
+var collidableMeshList = [];
 
 
 //bird position
@@ -80,6 +80,8 @@ function init() {
     createCoins();
     // add the objects
     createBird();
+    box()
+
     createSea();
     createSky();
 
@@ -89,6 +91,7 @@ function init() {
 
     fieldDistance = document.getElementById("distValue");
     fieldGameOver = document.getElementById("gameoverInstructions");
+    scoreBoard = document.getElementById("scoreValue");
 
 
 
@@ -115,16 +118,18 @@ createScene = function() {
 
     //camera
     aspectRatio = WIDTH / HEIGHT;
-    fieldOfView = 60;
-    nearPlane = 1;
-    farPlane = 10000;
+    fieldOfView = 100;
+    nearPlane = 5;
+    farPlane = 1010;
 
     camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
 
     // position of the camera
-    camera.position.x = 0;
-    camera.position.z = 200;
-    camera.position.y = 100;
+    camera.position.x = -250;
+    camera.position.z = 0;
+    camera.position.y = 150;
+    camera.rotation.z = 0;
+    camera.rotation.y = 300;
 
     // Create the renderer
     renderer = new THREE.WebGLRenderer({
@@ -160,16 +165,16 @@ function createLights() {
 
     // Directional light will act as shadow light 
     shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-    shadowLight.position.set(150, 350, 350);
+    shadowLight.position.set(-150, 150, 0);
 
     // Allowing shadow casting 
     shadowLight.castShadow = true;
 
     //the visible area of the projected shadow
-    shadowLight.shadow.camera.left = -400;
-    shadowLight.shadow.camera.right = 400;
-    shadowLight.shadow.camera.top = 400;
-    shadowLight.shadow.camera.bottom = -400;
+    shadowLight.shadow.camera.left = 400;
+    shadowLight.shadow.camera.right = -400;
+    shadowLight.shadow.camera.top = -400;
+    shadowLight.shadow.camera.bottom = 400;
     shadowLight.shadow.camera.near = 1;
     shadowLight.shadow.camera.far = 1000;
 
@@ -183,9 +188,37 @@ function createLights() {
 }
 
 
+function box() {
+    //create a box which will enclose the bird
+    var cubeGeometry = new THREE.CubeGeometry(2, .8, 3); //created a cube wiht (w,b,h) =  (4,1,3)
+    var cubeMaterial = new THREE.MeshLambertMaterial({ color: "red", transparent: true })
+    cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(-100, 100, 0);
+    cube.scale.set(5, 5, 5)
+    cube.visible = false; //make it invisible, set it to true to see the box
+    scene.add(cube)
+
+}
+
+var hit = false; // to check if the box(bird) collided with coin for now
 
 
+function collision() {
 
+    //console.log(coins);
+    //raycasting
+    var originPoint = cube.position.clone();
+    for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++) {
+        var ray = new THREE.Raycaster(cube.position, cube.geometry.vertices[vertexIndex]);
+        var collisionResults = ray.intersectObjects(collidableMeshList); // collidableMeshList is an array of objects(coins for now)
+        if (collisionResults.length > 0) {
+            hit = true;
+            console.log('hit coin');
+
+
+        }
+    }
+}
 
 
 //-------------------------Our Hero(The bird)-------------------------------------------
@@ -206,7 +239,7 @@ createBird = function() {
         mixers.push(mixer);
         birdModel.scale.set(7, 7, 7); //increase size of the bird by a factor of 7
 
-        birdModel.rotation.z = -1.4; //rotating the bird
+        birdModel.rotation.z = -1.55; //rotating the bird
 
         birdPosition = birdModel.position.copy(position);
         birdPositionY = birdModel.position.y;
@@ -229,7 +262,6 @@ createBird = function() {
 
 
 
-
                 //     for (var vertexIndex = 0; vertexIndex < o.geometry.vertices.length; vertexIndex++) {
                 //         var localVertex = o.geometry.vertices[vertexIndex].clone();
                 //         var globalVertex = localVertex.applyMatrix4(birdModel.matrix);
@@ -237,7 +269,7 @@ createBird = function() {
                 //         var ray = new THREE.Raycaster(
                 //             originPoint, directionVector.clone().normalize());
                 //         var collisionResults =
-                //             ray.intersectObjects(collidableList);
+                //             ray.intersectObjects(collidableMeshList);
 
                 //         if (collisionResults.length > 0 &&
                 //             collisionResults[0].distance < directionVector.length()) {
@@ -263,7 +295,7 @@ createBird = function() {
     const onError = (errorMessage) => { console.log(errorMessage); };
 
     // load the model. The model is loaded asynchronously
-    bird = new THREE.Vector3(-50, 100, 0);
+    bird = new THREE.Vector3(-100, 100, 0);
     loader.load(birdModel_PATH, gltf => onLoad(gltf, bird), onProgress, onError);
 
     var originPoint = bird; //current posotion of the bird
@@ -311,7 +343,7 @@ Cloud = function() {
 
         cloud = new THREE.Mesh(geo, cloudMaterial);
 
-        // set the position and the rotation of each torus randomly
+        // set the position and the rotation of each sphere randomly
         cloud.position.x = i * 15;
         cloud.position.y = Math.random() * 10;
         cloud.position.z = Math.random() * 10;
@@ -351,7 +383,7 @@ Sky = function() {
 
         // set the rotation and the position of each cloud;
         var a = stepAngle * i; // this is the final angle of the cloud
-        var h = 750 + +150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+        var h = 850 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
@@ -363,7 +395,7 @@ Sky = function() {
 
         // for a better result, we position the clouds 
         // at random depths inside of the scene
-        cloud.mesh.position.z = -400 - Math.random() * 400;
+        cloud.mesh.position.z = 300 - Math.random() * 400;
 
         // set a random scale for each cloud
         var size = 1 + Math.random() * 2;
@@ -528,25 +560,33 @@ function update() {
 //------------------updating score and distance-----------------------
 
 
+
 function updateDistance() {
-    distance += gameSpead * 100;
-    var d = distance / 2;
+    distance += gameSpead * 100; //spead of the game converted to distance (d = s*t (100ms))
+    var d = distance / 2; //divide distance into units
     fieldDistance.innerHTML = Math.floor(d);
-    tracking += .03;
+    tracking += .03; // tracks distance and updates 
 }
+
+//still fixing collision so that score works
 
 function updateScore() {
 
-    score += coinsCollided;
-    var s = distance / 2;
-    fieldDistance.innerHTML = Math.floor(s);
+    if (hit == true) {
+        score++;
+
+    }
+
+    scoreBoard.innerHTML = Math.floor(score);
+
+
 
 }
 
 function updateHealth(h) {
 
     let health = document.getElementById("health");
-    h = initHealth - tracking;
+    h = Math.ceil(initHealth - tracking); //updates health with distance
     // console.log(h);
 
     // if (health == "50%") {
@@ -556,10 +596,13 @@ function updateHealth(h) {
 
 
 
-    if (Math.ceil(h) == 0) {
-        gameOver();
-        console.log(h);
+    if (Math.ceil(h) == 0) { //checks if updated health is 0
+        gameOver(); // game over
+        // console.log(h);
     }
+
+
+
 
     return health.style.width = h + "%"; //we updating the healthbar
 
@@ -568,19 +611,24 @@ function updateHealth(h) {
 
 //----------------------------------gameOver------------------
 
+//not completed
+
 function gameOver() {
     fieldGameOver.className = "show";
     gameStatus = "gameOver";
     spear.mesh.visible = false;
     coin.mesh.visible = false;
+
 }
 
 //---------------------reset game for restarting---------------------
 
 
+//takes everything to where it was initially, still buggy
+
 function resetGame() {
 
-    bird = new THREE.Vector3(-50, 100, 0);
+    bird = new THREE.Vector3(-100, 100, 0);
 
     gameSpead = .001;
     level = 0;
@@ -603,7 +651,6 @@ function Spear() {
     });
 
 
-
     // duplicate the geometry a random number of times
     spearFreq = 3 + Math.floor(Math.random() * 3);
     for (var i = 0; i < spearFreq; i++) {
@@ -617,14 +664,16 @@ function Spear() {
         spear.rotation.z = 1.5;
 
         //random position of the spear
-        spear.position.x = 100;
+        spear.position.x = -200;
         spear.position.y = 10 + Math.random() * (140);
-        spear.position.z = 100 + Math.random() * 40;
+        spear.position.z = -200 + Math.random() * 200;
 
 
 
         // add the spears to the container we first created
         this.mesh.add(spear);
+
+
 
     }
 
@@ -663,12 +712,57 @@ RotateSpears = function() {
 
         // for a better result, we position the spears 
         // at random depths inside of the scene
-        _spear.mesh.position.z = -100 - Math.random() * 50;
+        _spear.mesh.position.z = -200 + Math.floor(Math.random() * 200);
 
         // set a random scale for each spears
 
         this.mesh.add(_spear.mesh);
-        collidableSpears.push(_spear.mesh)
+
+
+    }
+
+    // console.log(collidableSpears);
+}
+
+
+
+RotateSpears2 = function() {
+
+    // Create an empty container
+    this.mesh = new THREE.Object3D();
+
+    // number of spears to be scattered in the sky
+    this.nSpears = 20;
+
+    // To distribute the spears consistently,
+    // we need to place them according to a uniform angle
+    var stepAngle = Math.PI * 2 / this.nSpears;
+
+    // create the spears
+    var _spear2;
+    for (var i = 0; i < this.nSpears; i++) {
+        _spear2 = new Spear();
+
+        // set the rotation and the position of each spears;
+        var a = stepAngle * i; // this is the final angle of the spears
+        var h = 600 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+
+
+        //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
+        _spear2.mesh.position.y = Math.sin(a) * h;
+        _spear2.mesh.position.x = Math.cos(a) * h;
+
+        // rotating the spears according to its position
+        _spear2.mesh.rotation.z = a + Math.PI / 1.8;
+
+        // for a better result, we position the spears 
+        // at random depths inside of the scene
+        _spear2.mesh.position.z = 200 + Math.floor(Math.random() * 100);
+
+        // set a random scale for each spears
+
+        this.mesh.add(_spear2.mesh);
+
 
     }
 
@@ -681,8 +775,14 @@ RotateSpears = function() {
 
 function createSpears() {
     rotateSpears = new RotateSpears();
+    rotateSpears2 = new RotateSpears2();
+
     rotateSpears.mesh.position.y = -700;
+    //rotateSpears2.mesh.position.y = -700;
+
     scene.add(rotateSpears.mesh);
+    //scene.add(rotateSpears2.mesh);
+
 
 
 }
@@ -690,19 +790,21 @@ function createSpears() {
 
 //-----------------------------------------coins---------------------------
 
+var coins = [];
 
 function Coin() {
     this.mesh = new THREE.Object3D();
-    var geom = new THREE.TorusBufferGeometry(3, .8, 6, 68);
+    var geom = new THREE.SphereGeometry(4, 4, 2, 2);
     var mat = new THREE.MeshPhongMaterial({
         color: "yellow",
         shininess: 0,
         specular: 0xffffff,
-        shading: THREE.FlatShading
+        flatShading: THREE.FlatShading
     });
 
 
     coin = new THREE.Mesh(geom, mat);
+
 
     // duplicate the geometry a random number of times
     var coinFreq = 3 + Math.floor(Math.random() * 5);
@@ -715,14 +817,16 @@ function Coin() {
         coin.receiveShadow = true;
 
         //random position of the coin
-        coin.position.x = 100;
-        coin.position.y = 10 + Math.random() * (150);
-        coin.position.x = 100 + Math.random() * 40;
+        coin.position.x = 50;
+
 
 
 
         // add the coins to the container we first created
         this.mesh.add(coin);
+
+
+
 
     }
 
@@ -742,14 +846,14 @@ RotateCoins = function() {
     // we need to place them according to a uniform angle
     var stepAngle = Math.PI * 4 / this.nCoins;
 
-    // create the coin
-    var _coin;
+    // create the coins
     for (var i = 0; i < this.nCoins; i++) {
         _coin = new Coin();
 
+
         // set the rotation and the position of each coin;
         var a = stepAngle * i; // this is the final angle of the coin
-        var h = 600 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the coin itself
+        var h = 500 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the coin itself
 
 
         //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
@@ -761,15 +865,25 @@ RotateCoins = function() {
 
         // for a better result, we position the coin 
         // at random depths inside of the scene
-        _coin.mesh.position.z = -100 - Math.random() * 50;
+
+        _coin.mesh.position.z = 0;
 
         // set a random scale for each coin
 
+        coins.push(_coin.mesh)
         this.mesh.add(_coin.mesh);
-        collidableCoins.push(_coin.mesh);
-    }
 
-    // console.log(collidableCoins)
+        //coins.pop();
+
+        collidableMeshList.push(coin);
+        console.log(_coin.mesh.children);
+
+
+    }
+    //collidableMeshList = this.mesh.children[0].children;
+
+
+
 }
 
 
@@ -778,7 +892,9 @@ RotateCoins = function() {
 
 function createCoins() {
     rotateCoins = new RotateCoins();
+
     rotateCoins.mesh.position.y = -700;
+
     scene.add(rotateCoins.mesh);
 }
 
@@ -810,28 +926,35 @@ function doKey(event) {
 
 
 
-    if (code === 37 && birdModel.position.z > -40) { //put some boundaries for the bird
+    if (code === 37 && birdModel.position.z > -100) { //put some boundaries for the bird
         //does not have to exceed -40 units z-diration
         //left arrow
         birdModel.position.z -= 1;
-    } else if (code === 39 && birdModel.position.z < 40) { //put some boundaries for the bird
+        cube.position.z -= 1;
+    } else if (code === 39 && birdModel.position.z < 100) { //put some boundaries for the bird
         //does not have to exceed 40 units z-diration
         //right arrow
 
         birdModel.position.z += 1;
+        cube.position.z += 1;
 
 
-    } else if (code === 38 && birdModel.position.y < 140) { //put some boundaries for the bird
+
+    } else if (code === 38 && birdModel.position.y < 150) { //put some boundaries for the bird
         //does not have to exceed 140 units above y-diration
 
         //up arrow
         birdModel.position.y += 1;;
+        cube.position.y += 1;;
+
 
 
     } else if (code === 40 && birdModel.position.y > 10) { //put some boundaries for the bird
         //does not have to exceed 10 units below y-diration
         //down arrow
         birdModel.position.y -= 1;
+        cube.position.y -= 1;
+
 
 
     }
@@ -862,21 +985,42 @@ function doKey(event) {
 
 
 //----------------------Rendering-----------------------------------------------
+var levelSpeed = 0.00001 //speed of a level after a certain distance is reached, level spead will update
 
 
 function render() {
 
     // Rotate the sea,spears and the sky
-    sea.mesh.rotation.z += .0015;
-    sky.mesh.rotation.z += .01;
+    sea.mesh.rotation.z += gameSpead;
+    sky.mesh.rotation.z += gameSpead;
     rotateSpears.mesh.rotation.z += gameSpead;
+    //rotateSpears2.mesh.rotation.z += gameSpead;
+
     rotateCoins.mesh.rotation.z += gameSpead;
 
 
+    if (Math.ceil(distance) > 0) { //acts as if(!gameOver) for now
+        //updateing the speeds
+        sea.mesh.rotation.z += gameSpead + levelSpeed;
+        sky.mesh.rotation.z += gameSpead + levelSpeed;
+        rotateSpears.mesh.rotation.z += gameSpead + levelSpeed;
+        //rotateSpears2.mesh.rotation.z += gameSpead;
 
+        rotateCoins.mesh.rotation.z += gameSpead + levelSpeed;
+        levelSpeed += .000005; // update levelSpeed
+
+    }
+    //console.log(levelSpeed);
+
+
+
+    //updating
     sea.moveWaves(); //wave 
     updateDistance();
     updateHealth();
+    collision();
+
+
     renderer.render(scene, camera);
 
 
