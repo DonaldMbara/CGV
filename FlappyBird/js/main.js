@@ -17,6 +17,9 @@ var birdModel;
 var cube; //covers the bird
 var loader;
 var spearFreq; //number of spears that passed a point
+var hitCoin = false; // to check if the box(bird) collided with coin for now
+var hitSpear = false; // to check if the bird collided with the spear
+
 
 // we use this one to reduce the health if the bird is not taking coins
 // it increases with level, and gets updated with distance
@@ -27,8 +30,9 @@ var tracking = 0;
 
 //collision
 
-//stores all mesh which collide with the bird, e.i spear & coin
+//store all mesh which collide with the bird, e.i spear & coin
 var collidableMeshList = [];
+var collidableMeshListSpear = [];
 
 
 //bird position
@@ -200,25 +204,6 @@ function box() {
 
 }
 
-var hit = false; // to check if the box(bird) collided with coin for now
-
-
-function collision() {
-
-    //console.log(coins);
-    //raycasting
-    var originPoint = cube.position.clone();
-    for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++) {
-        var ray = new THREE.Raycaster(cube.position, cube.geometry.vertices[vertexIndex]);
-        var collisionResults = ray.intersectObjects(collidableMeshList); // collidableMeshList is an array of objects(coins for now)
-        if (collisionResults.length > 0) {
-            hit = true;
-            console.log('hit coin');
-
-
-        }
-    }
-}
 
 
 //-------------------------Our Hero(The bird)-------------------------------------------
@@ -572,7 +557,7 @@ function updateDistance() {
 
 function updateScore() {
 
-    if (hit == true) {
+    if (hitCoin == true) {
         score++;
 
     }
@@ -615,9 +600,9 @@ function updateHealth(h) {
 
 function gameOver() {
     fieldGameOver.className = "show";
-    gameStatus = "gameOver";
-    spear.mesh.visible = false;
-    coin.mesh.visible = false;
+    gameStatus = "gameOver" + "Distance: " + distance;
+    distance = 0;
+
 
 }
 
@@ -677,8 +662,8 @@ function Spear() {
 
     }
 
-
 }
+
 
 
 RotateSpears = function() {
@@ -712,62 +697,22 @@ RotateSpears = function() {
 
         // for a better result, we position the spears 
         // at random depths inside of the scene
-        _spear.mesh.position.z = -200 + Math.floor(Math.random() * 200);
+        _spear.mesh.position.z = -50 + Math.floor(Math.random() * 200);
 
         // set a random scale for each spears
+
+        collidableMeshListSpear.push(spear);
 
         this.mesh.add(_spear.mesh);
 
 
-    }
-
-    // console.log(collidableSpears);
-}
-
-
-
-RotateSpears2 = function() {
-
-    // Create an empty container
-    this.mesh = new THREE.Object3D();
-
-    // number of spears to be scattered in the sky
-    this.nSpears = 20;
-
-    // To distribute the spears consistently,
-    // we need to place them according to a uniform angle
-    var stepAngle = Math.PI * 2 / this.nSpears;
-
-    // create the spears
-    var _spear2;
-    for (var i = 0; i < this.nSpears; i++) {
-        _spear2 = new Spear();
-
-        // set the rotation and the position of each spears;
-        var a = stepAngle * i; // this is the final angle of the spears
-        var h = 600 + 150 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
-
-
-        //  converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
-        _spear2.mesh.position.y = Math.sin(a) * h;
-        _spear2.mesh.position.x = Math.cos(a) * h;
-
-        // rotating the spears according to its position
-        _spear2.mesh.rotation.z = a + Math.PI / 1.8;
-
-        // for a better result, we position the spears 
-        // at random depths inside of the scene
-        _spear2.mesh.position.z = 200 + Math.floor(Math.random() * 100);
-
-        // set a random scale for each spears
-
-        this.mesh.add(_spear2.mesh);
-
 
     }
 
     // console.log(collidableSpears);
 }
+
+
 
 
 
@@ -775,7 +720,6 @@ RotateSpears2 = function() {
 
 function createSpears() {
     rotateSpears = new RotateSpears();
-    rotateSpears2 = new RotateSpears2();
 
     rotateSpears.mesh.position.y = -700;
     //rotateSpears2.mesh.position.y = -700;
@@ -980,7 +924,40 @@ function doKey(event) {
 //------------------------------collison-----------------------------------------
 
 
+function collisionCoin() {
 
+    //console.log(coins);
+    //raycasting
+    var originPoint = cube.position.clone();
+    for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++) {
+        var ray = new THREE.Raycaster(cube.position, cube.geometry.vertices[vertexIndex]);
+        var collisionResults = ray.intersectObjects(collidableMeshList); // collidableMeshList is an array of objects(coins for now)
+        if (collisionResults.length > 0) {
+            hitCoin = true;
+            console.log('hit coin');
+
+
+        }
+    }
+}
+
+
+function collisionSpear() {
+
+    //console.log(coins);
+    //raycasting
+    var originPoint = cube.position.clone();
+    for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++) {
+        var ray = new THREE.Raycaster(cube.position, cube.geometry.vertices[vertexIndex]);
+        var collisionResults = ray.intersectObjects(collidableMeshListSpear); // collidableMeshList is an array of objects(coins for now)
+        if (collisionResults.length > 0) {
+            hitSpear = true;
+            console.log('hit spear');
+
+
+        }
+    }
+}
 
 
 
@@ -999,7 +976,7 @@ function render() {
     rotateCoins.mesh.rotation.z += gameSpead;
 
 
-    if (Math.ceil(distance) > 0) { //acts as if(!gameOver) for now
+    if (Math.ceil(distance) > 0 && Math.ceil(initHealth != 0)) { //acts as if(!gameOver) for now
         //updateing the speeds
         sea.mesh.rotation.z += gameSpead + levelSpeed;
         sky.mesh.rotation.z += gameSpead + levelSpeed;
@@ -1018,7 +995,8 @@ function render() {
     sea.moveWaves(); //wave 
     updateDistance();
     updateHealth();
-    collision();
+    collisionCoin();
+    collisionSpear();
 
 
     renderer.render(scene, camera);
