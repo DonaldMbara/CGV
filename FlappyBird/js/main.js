@@ -62,7 +62,7 @@ var rotateCoins;
 var score = 0;
 var distance = 0;
 var initHealth = 100;
-var gameSpead = .001;
+var gameSpead = .0009;
 var coinsCollided = 0; //helps with score, should be incremented when our hero collides with a coin
 var gameStatus = "play";
 var scoreBoard;
@@ -862,6 +862,8 @@ RotateCoins = function() {
         // at random depths inside of the scene
 
         _coin.mesh.position.z = 0;
+        //  _coin.mesh.position.y = 10 + Math.random() * (140);
+        _coin.mesh.position.z = -150 + Math.random() * 200;
 
         // set a random scale for each coin
 
