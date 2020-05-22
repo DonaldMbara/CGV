@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flappy Bird Game3D</title>
+
+    <!--
+      Include the main three.js script.
+      The global variable THREE will be
+      available for use in any scripts
+      loaded after this one.
+    -->
+
+    <script src="js/three/three.js"></script>
+
+    <!--
+      Include the OrbitControls script.
+      This must be included AFTER the three.js script as it
+      needs to use the global THREE variable
+    -->
+
+    <script src="js/three/OrbitControls.js"></script>
+
+    <!--
+			Include the GLTFLoader script. This also needs to be loaded after the three.js script
+		-->
+
+    <script src="js/three/GLTFLoader.js"></script>
+
+
+
+    <style>
+        #world {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( #408be0, #67b1e2);
+        }
+
+        html,
+        body,
+        #world {
+            margin: 0;
+            height: 100%;
+            overflow: hidden
+        }
+
+        #gameoverInstructions {
+            position: absolute;
+            font-family: 'Voltaire', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 120px;
+            text-align: center;
+            color: #0e095e;
+            opacity: 0;
+            left: 50%;
+            top: 50%;
+            width: 100%;
+            -webkit-transform: translate(-50%, -100%);
+            transform: translate(-50%, -100%);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-transition: all 500ms ease-in-out;
+            transition: all 500ms ease-in-out;
+        }
+
+        #gameoverInstructions.show {
+            opacity: 1;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            -webkit-transition: all 500ms ease-in-out;
+            transition: all 500ms ease-in-out;
+        }
+
+        #distValue {
+            position: relative;
+            text-transform: uppercase;
+            color: #25314b;
+            font-size: 40px;
+            font-family: 'Voltaire';
+            text-align: center;
+        }
+
+        #dist {
+            position: absolute;
+            left: 30%;
+            top: 50px;
+            -webkit-transform: translate(-50%, 0%);
+            transform: translate(-50%, 0%);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #scoreValue {
+            position: relative;
+            text-transform: uppercase;
+            color: #222e49;
+            font-size: 40px;
+            font-family: 'Voltaire';
+            text-align: center;
+        }
+
+        #score {
+            position: absolute;
+            left: 40%;
+            top: 50px;
+            -webkit-transform: translate(-50%, 0%);
+            transform: translate(-50%, 0%);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .vertical {
+            border-left: 2px solid #222e49;
+            height: 50px;
+            top: 60px;
+            position: relative;
+            left: 35%;
+        }
+
+        .life {
+            position: relative;
+            height: 10px;
+            width: 200px;
+            background: #222e49;
+            -moz-border-radius: 25px;
+            -webkit-border-radius: 25px;
+            border-radius: 25px;
+            top: 20px;
+            left: 50%;
+            padding: 10px;
+            box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .life>span {
+            display: block;
+            height: 100%;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            background-color: rgb(26, 240, 6);
+            background-image: linear-gradient( center bottom, rgb(43, 194, 83) 37%, rgb(84, 240, 84) 69%);
+            box-shadow: inset 0 2px 9px rgba(255, 255, 255, 0.3), inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vertical2 {
+            border-left: 2px solid #222e49;
+            height: 50px;
+            top: -20px;
+            position: relative;
+            left: 45%;
+        }
+    </style>
+
+    <script type="text/javascript" src="js/main.js">
+        "use strict";
+    </script>
+</head>
+
+<body>
+
+<div id="world"></div>
+<!--Game over-->
+<div id="gameoverInstructions">
+    Game Over
+</div>
+<!--distance-->
+<div id="dist">
+    <div class="label">distance</div>
+    <div id="distValue">000</div>
+</div>
+<!--vertical divider-->
+<div class="vertical"></div>
+<!--score-->
+<div id="score">
+    <div class="label">score</div>
+    <div id="scoreValue">0</div>
+</div>
+<!--health bar of our hero-->
+
+<div class="life">
+    <span id="health" style="width: 100%"></span>
+</div>
+<!--vertical divider-->
+
+<div class="vertical2"></div>
+
+
+<noscript>
+    <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+</noscript>
+
+
+</body>
+
+</html>

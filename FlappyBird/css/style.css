@@ -1,0 +1,83 @@
+body {
+    /*background-image: url("/image/background.jpg");*/
+    /*background-image: linear-gradient(to bottom right,lightblue,whitesmoke);*/
+    background-image: url("/images/birdy.jpeg");
+
+    background-size: cover;
+    background-repeat: no-repeat;
+
+}
+
+
+/*.frame{
+    width: 500px;
+    height: 500px;
+    margin: auto;
+    text-align: center;
+
+    border: 1px solid transparent;
+
+}*/
+
+.frame {
+    width: 500px;
+    height: 575px;
+
+    background-repeat: no-repeat;
+
+    margin: auto;
+    text-align: center;
+    border: 2px solid transparent;
+    -webkit-box-shadow: 0px 10px 13px -7px #add8e6, 5px 5px 15px 5px rgba(0,0,0,0);
+    box-shadow: 0px 10px 13px -7px #add8e6, 5px 5px 15px 5px rgba(0,0,0,0);
+    /*background-image: url("/image/back.jpg");*/
+    /*background-image: url("/image/back.jpg");*/
+    /*background-image: linear-gradient(to right, cornflowerblue, white);*/
+    background-size: auto;
+
+    /*margin-left: 100px;*/
+
+    position: relative;
+    top: -5rem;
+    /*z-index: -1;*/
+}
+img {
+    height: 200px;
+    width: 900px;
+    text-align: center;
+    margin: auto;
+}
+.frame1 {
+    text-align: center;
+    margin: auto;
+    z-index: 10;
+    margin-top: 35px;
+}
+.button {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 80px;
+    padding-right: 80px;
+    background-color: transparent;
+    -webkit-box-shadow: 5px 5px 5px 0px #000000, inset 4px 4px 15px 0px #000000, 5px 5px 15px 5px rgba(22, 22, 255, 0.5);
+    box-shadow: 5px 5px 5px 0px #add8e6, inset 4px 4px 15px 0px #add8e6, 5px 5px 15px 5px rgba(22, 22, 255, 0.5);
+    text-shadow: #FFF 0px 0px 5px, #FFF 0px 0px 10px, #FFF 0px 0px 15px, #1616ff 0px 0px 20px, #FF2D95 0px 0px 30px, #FF2D95 0px 0px 40px, #FF2D95 0px 0px 50px, #FF2D95 0px 0px 75px;
+    border: 3px double #add8e6;
+    border-radius: 3px;
+    color: #add8e6;
+    font-family: 'Franklin Gothic Demi Cond', cursive;
+    font-size: 16px;
+}
+.button:hover{
+    background-color: cornflowerblue ;
+}
+.button:active{
+    background-color: cornflowerblue;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+.btn-group {
+    margin-top: 80px;
+}
