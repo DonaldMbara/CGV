@@ -1,23 +1,11 @@
+/***********The styling of the frame and the buttons happens here*************/
 body {
-    /*background-image: url("/image/background.jpg");*/
-    /*background-image: linear-gradient(to bottom right,lightblue,whitesmoke);*/
-    background-image: url("/images/birdy.jpeg");
 
+    background-image: url("/images/birdy.jpeg");
     background-size: cover;
     background-repeat: no-repeat;
 
 }
-
-
-/*.frame{
-    width: 500px;
-    height: 500px;
-    margin: auto;
-    text-align: center;
-
-    border: 1px solid transparent;
-
-}*/
 
 .frame {
     width: 500px;
@@ -30,13 +18,7 @@ body {
     border: 2px solid transparent;
     -webkit-box-shadow: 0px 10px 13px -7px #add8e6, 5px 5px 15px 5px rgba(0,0,0,0);
     box-shadow: 0px 10px 13px -7px #add8e6, 5px 5px 15px 5px rgba(0,0,0,0);
-    /*background-image: url("/image/back.jpg");*/
-    /*background-image: url("/image/back.jpg");*/
-    /*background-image: linear-gradient(to right, cornflowerblue, white);*/
     background-size: auto;
-
-    /*margin-left: 100px;*/
-
     position: relative;
     top: -5rem;
     /*z-index: -1;*/
@@ -81,3 +63,4 @@ img {
 .btn-group {
     margin-top: 80px;
 }
+

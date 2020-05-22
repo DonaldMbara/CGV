@@ -66,6 +66,7 @@ var gameSpead = .001;
 var coinsCollided = 0; //helps with score, should be incremented when our hero collides with a coin
 var gameStatus = "play";
 var scoreBoard;
+var pauseButton;
 
 
 /**
@@ -73,6 +74,7 @@ var scoreBoard;
  */
 
 function init() {
+
 
     // set up the scene, the camera and the renderer
     createScene();
