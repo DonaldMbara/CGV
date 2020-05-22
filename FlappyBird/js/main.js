@@ -67,6 +67,8 @@ var coinsCollided = 0; //helps with score, should be incremented when our hero c
 var gameStatus = "play";
 var scoreBoard;
 var pauseButton;
+var replayView;
+var health;
 
 
 /**
@@ -74,7 +76,6 @@ var pauseButton;
  */
 
 function init() {
-
 
     // set up the scene, the camera and the renderer
     createScene();
@@ -91,26 +92,45 @@ function init() {
     createSea();
     createSky();
 
-    resetGame();
+
+
 
 
 
     fieldDistance = document.getElementById("distValue");
     fieldGameOver = document.getElementById("gameoverInstructions");
     scoreBoard = document.getElementById("scoreValue");
+    replayView = document.getElementById("replayMessage");
+    health = document.getElementById("health");
+
 
 
 
     //add the listener
     document.addEventListener('keydown', doKey, false);
+    document.addEventListener('mouseup', handleMouseUp, false);
+    document.addEventListener('touchend', handleTouchEnd, false);
 
     //render the scene on each frame
-    renderer.setAnimationLoop(() => {
+    if (gameStatus == "play") {
+        renderer.setAnimationLoop(() => {
 
-        update();
+            update();
 
-    });
-    render();
+        });
+        render();
+    } else if (distance == 0) {
+        gameStatus = 'waitingReplay';
+        //health.style.width = "100%";
+
+
+        showReplay();
+
+    } else {
+        //console.log(gameStatus);
+        gameOver();
+    }
+
 
 }
 
@@ -557,22 +577,11 @@ function updateDistance() {
 
 //still fixing collision so that score works
 
-function updateScore() {
 
-    if (hitCoin == true) {
-        score++;
-
-    }
-
-    scoreBoard.innerHTML = Math.floor(score);
-
-
-
-}
 
 function updateHealth(h) {
 
-    let health = document.getElementById("health");
+
     h = Math.ceil(initHealth - tracking); //updates health with distance
     // console.log(h);
 
@@ -583,9 +592,13 @@ function updateHealth(h) {
 
 
 
-    if (Math.ceil(h) == 0) { //checks if updated health is 0
-        gameOver(); // game over
-        // console.log(h);
+    if (Math.floor(h) == 0) { //checks if updated health is 0
+        gameOver();
+        h = 0;
+        console.log(h);
+        return health.style.width = 100 + "%";
+        // game over
+
     }
 
 
@@ -599,13 +612,48 @@ function updateHealth(h) {
 //----------------------------------gameOver------------------
 
 //not completed
+//takes everything to initial stage
 
 function gameOver() {
     fieldGameOver.className = "show";
-    gameStatus = "gameOver" + "Distance: " + distance;
+    score = 0;
     distance = 0;
+    initHealth = 100;
+    health.style.wid
+    gameSpead = 0;
+    levelSpeed = 0;
+    gameStatus = "gameOver";
+    distance = 0;
+    showReplay();
 
 
+}
+
+
+//--replay
+
+function showReplay() {
+    replayMessage.style.display = "block";
+}
+
+function hideReplay() {
+    replayMessage.style.display = "none";
+}
+
+
+function handleMouseUp(event) {
+    if (gameStatus == "gameOver") {
+        resetGame();
+        hideReplay();
+    }
+}
+
+
+function handleTouchEnd(event) {
+    if (gameStatus == "gameOver") {
+        resetGame();
+        hideReplay();
+    }
 }
 
 //---------------------reset game for restarting---------------------
@@ -616,7 +664,7 @@ function gameOver() {
 function resetGame() {
 
     bird = new THREE.Vector3(-100, 100, 0);
-
+    initHealth = 100;
     gameSpead = .001;
     level = 0;
     distance = 0;
@@ -764,6 +812,7 @@ function Coin() {
 
         //random position of the coin
         coin.position.x = 50;
+
 
 
 
@@ -936,7 +985,10 @@ function collisionCoin() {
         var collisionResults = ray.intersectObjects(collidableMeshList); // collidableMeshList is an array of objects(coins for now)
         if (collisionResults.length > 0) {
             hitCoin = true;
-            console.log('hit coin');
+            score++;
+            console.log('hit coin ' + score);
+            scoreBoard.innerHTML = Math.floor(score);
+            initHealth += 1
 
 
         }
@@ -955,6 +1007,8 @@ function collisionSpear() {
         if (collisionResults.length > 0) {
             hitSpear = true;
             console.log('hit spear');
+            initHealth -= 1;
+
 
 
         }
