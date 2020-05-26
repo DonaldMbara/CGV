@@ -1034,7 +1034,7 @@ function render() {
     rotateCoins.mesh.rotation.z += gameSpead;
 
 
-    if (Math.ceil(distance) > 0 && Math.ceil(initHealth != 0)) { //acts as if(!gameOver) for now
+    if (Math.ceil(distance) > 0 && Math.ceil(initHealth) != 0) { //acts as if(!gameOver) for now
         //updateing the speeds
         sea.mesh.rotation.z += gameSpead + levelSpeed;
         sky.mesh.rotation.z += gameSpead + levelSpeed;
