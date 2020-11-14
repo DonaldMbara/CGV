@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Adventures of Storky</title>
+
+    <!--CSS-->
+    <!--Includes the stylesheet that contains style declaration
+    for all elements(not the game themselves, but the UI elements like
+    buttons, game menus, score trackers) in the game-->
+    <link rel="stylesheet" href="css/index.css">
+
+    <!--JS-->
+    <script src="js/utils/Constants.js"></script>
+    <script src="js/three/three.js"></script>
+    <script src="js/three/Refractor.js"></script>
+    <script src="js/three/WaterRefractionShader.js"></script>
+    <script src="js/three/GLTFLoader.js"></script>
+    <script src="js/three/DragControls.js"></script>
+    <script src="js/three/OrbitControls.js"></script>
+    <script src="js/managers/SceneManager.js"></script>
+    <script src="js/Storky/Storky.js"></script>
+    <script src="js/obstacles/Pipe.js"></script>
+
+    <!--Responsible for calling functions to build scene and game play-->
+    <script src="js/managers/GameManager.js"></script>
+    <script src="js/managers/LevelManager.js"></script>
+    <script src="js/managers/HighScoreManager.js"></script>
+
+
+</head>
+<body>
+
+<!--Audio tag for background music-->
+<audio id="backgroundMusic">
+    <source src="sounds/background.mp3" type="audio/mpeg">
+</audio>
+
+<div class="gameMenu" style="display: block">
+    <div>
+        <button onclick="setGameToPlay()">Start Game</button>
+        <button onclick="startAtLevel1()">Level 1</button>
+        <button onclick="startAtLevel2()">Level 2</button>
+        <button onclick="startAtLevel3()">Level 3</button>
+        <button onclick="startAtLevel4()">Level 4</button>
+        <button onclick="showScoreMenu()">High Scores</button>
+        <button onclick="showHowToPlayMenu()">How to play</button>
+    </div>
+</div>
+
+<div id="gameOver" class="gameMenu">
+    <div>
+        <p>You died or didn't pass through the pipes</p>
+        <button onclick="startAtLevel1()">Restart</button>
+        <button onclick="startAtLevel1()">Level 1</button>
+        <button onclick="startAtLevel2()">Level 2</button>
+        <button onclick="startAtLevel3()">Level 3</button>
+        <button onclick="startAtLevel4()">Level 4</button>
+        <button onclick="showScoreMenu()">High Scores</button>
+        <button onclick="showHowToPlayMenu()">How to play</button>
+    </div>
+</div>
+
+<div id="gamePaused" class="gameMenu">
+    <div>
+        <p>Game Paused</p>
+        <button onclick="resumeGame()">Resume</button>
+        <button onclick="startAtLevel1()">Restart</button>
+        <button onclick="startAtLevel1()">Level 1</button>
+        <button onclick="startAtLevel2()">Level 2</button>
+        <button onclick="startAtLevel3()">Level 3</button>
+        <button onclick="startAtLevel4()">Level 4</button>
+        <button onclick="showScoreMenu()">High Scores</button>
+        <button onclick="showHowToPlayMenu()">How to play</button>
+    </div>
+</div>
+
+<div id="gameComplete" class="gameMenu">
+    <div>
+        <p>Game Complete, your Queen or King :) :)</p>
+        <button onclick="startAtLevel1()">Level 1</button>
+        <button onclick="startAtLevel2()">Level 2</button>
+        <button onclick="startAtLevel3()">Level 3</button>
+        <button onclick="startAtLevel4()">Level 4</button>
+        <button onclick="showScoreMenu()">High Scores</button>
+        <button onclick="showHowToPlayMenu()">How to play</button>
+    </div>
+</div>
+
+<div id="gameScore" class="gameMenu">
+    <div>
+        <p id="gameScores"></p>
+        <button onclick="closeMenu('gameScore')">Close</button>
+    </div>
+</div>
+
+<div id="gameHowToPlay" class="gameMenu">
+    <div>
+        <p>How to play</p>
+        <p>Controls:<br/>
+            w, arrowup, space - push bird up<br/>
+            a, arrowleft - move bird left <br/>
+            d, arrowright - move bird right <br/>
+            move mirrors by dragging them using mouse <br/>
+            c - change camera <br/>
+            p - pause game <br/>
+        </p>
+        <button onclick="closeMenu('gameHowToPlay')">Close</button>
+    </div>
+</div>
+
+
+
+<div class="pipeCountDiv">
+    <p>Total pipes passed</p>
+    <p id="pipeCount">0</p>
+</div>
+
+<script>
+    //create a high score manager, used to update and display highscores
+    let highScoreManager = new HighScoreManager();
+
+    //closes all menus
+    function closeAllOpenedMenus() {
+        let menus = document.getElementsByClassName("gameMenu");//get references to all the menus
+        for (let i = 0; i < menus.length; i++) menus[i].style.display = "none";//close the menus
+    }
+
+    //starts or resumes the games
+    //and sets the music to play
+    function setGameToPlay() {
+        if (storkyIsLoaded){//true if the bird model is loaded
+            closeAllOpenedMenus();
+            gameInPlay = !gameInPlay;
+            document.getElementById("backgroundMusic").play();//referencing and playing the audio tag above
+        }
+    }
+
+    //removes all the objects
+    //then rebuilds game from level1
+    //the function is called in level1
+    //button onclick function
+    function startAtLevel1() {
+        if (storkyIsLoaded){
+            buttonPressed();
+            cleanUpScene();//removes all the objects already in scene
+            buildLevel1();
+            setTimeout(function () {
+                setGameToPlay();
+            }, 1500);
+
+        }
+    }
+
+    //similar as above
+    function startAtLevel2() {
+        if (storkyIsLoaded){
+            buttonPressed();
+            cleanUpScene();
+            buildLevel2();
+            setTimeout(function () {
+                setGameToPlay();
+            }, 1500);
+        }
+    }
+
+    //similar as above
+    function startAtLevel3() {
+        if (storkyIsLoaded){
+            buttonPressed();
+            cleanUpScene();
+            buildLevel3();
+            setTimeout(function () {
+                setGameToPlay();
+            }, 1500);
+        }
+    }
+
+    //similar as above
+    function startAtLevel4() {
+        if (storkyIsLoaded){
+            buttonPressed();
+            cleanUpScene();
+            buildLevel4();
+            setTimeout(function () {
+                setGameToPlay();
+            }, 1500);
+        }
+    }
+
+    //plays a sound when button is pressed
+    function buttonPressed() {
+        let audio = new Audio("sounds/button_pressed.mp3");
+        audio.play().then(r => {});
+    }
+
+    //pauses the game and displays the pause menu
+    function pauseGame() {
+        if (gameInPlay){
+            gameInPlay = !gameInPlay;
+            document.getElementById("gamePaused").style.display = "block";
+        }
+
+    }
+
+    //closes all menus and resumes the game
+    function resumeGame() {
+        if (!gameInPlay){
+            closeAllOpenedMenus();
+            gameInPlay = !gameInPlay;
+        }
+    }
+
+    //close the current Menu
+    function closeMenu(currentMenuId) {
+        document.getElementById(currentMenuId).style.display = "none";
+    }
+
+    //displays the score menu
+    function showScoreMenu() {
+        document.getElementById("gameScore").style.display = "block";
+        let scoreView = document.getElementById("gameScores");
+        highScoreManager.displayHighScores(scoreView);
+    }
+
+    //displays the how to play menu
+    function showHowToPlayMenu() {
+        document.getElementById("gameHowToPlay").style.display = "block";
+    }
+
+    //displays the Game Complete menu
+    function gameComplete() {
+        gameInPlay = !gameInPlay;
+        document.getElementById("gameComplete").style.display = "block";
+        highScoreManager.addHighScore(pipeCount);
+    }
+
+</script>
+
+</body>
+</html>

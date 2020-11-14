@@ -1,0 +1,82 @@
+html, body, canvas{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/*Style for gameMenu and all elements within*/
+.gameMenu {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    background-size: cover;
+    background-position: right;
+    background-image: url("../images/background.jpg");
+    background-color: rgb(27, 176, 255); /* Black background with opacity */
+    z-index: 4; /* Specify a stack order in case you're using a different order for other elements */
+}
+
+.gameMenu div{
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    margin-top: 100px;
+    margin-left: 200px;
+}
+
+.gameMenu div p{
+    text-align: center;
+    font-weight: bolder;
+    color: chocolate;
+    margin: 0;
+    padding: 0;
+}
+
+.gameMenu div button{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 50px;
+    border-radius: 5px;
+    color: black;
+    border: 1px solid black;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.gameMenu div button:hover{
+    color: white;
+    border: 1px solid white;
+    background-color: black;
+    transform: scale(1.1);
+}
+
+.pipeCountDiv{/*positions a div to the top right corner*/
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.pipeCountDiv p{
+    text-align: center;
+}
+
+.pipeCountDiv p:first-child{
+    color: #000000;
+    font-size: 15px;
+}
+
+.pipeCountDiv p:nth-child(2){
+    font-size: 25px;
+    color: green;
+}
+
+/*defines the style properties for the picture in picture view for
+the side view of the game located at the bottom right corner*/
+.sideCameraViewPort{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
